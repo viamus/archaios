@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+  run:auth:
+    desc: "🚀 Rodar o serviço user"
+    dir: services/auth
+    cmds:
+      - go run ./cmd/authservice
+
+
+  build:
+    desc: "📦 Buildar todos os serviços"
+    cmds:
+      - go build -o bin/user ./services/user/cmd/user
+      - go build -o bin/stock ./services/stock/cmd/stock
+
+  tidy:
+    desc: "🧹 Rodar go mod tidy em todos os módulos"
+    cmds:
+      - go mod tidy ./services/user
+      - go mod tidy ./services/stock
+      - go mod tidy ./libs/envconfig
+
+  work:init:
+    desc: "🔄 Recriar o go.work com todos os módulos"
+    cmds:
+      - rm -f go.work
+      - go work init ./services/* ./libs/*
+
+  lint:
+    desc: "🔍 Rodar lint com golangci-lint"
+    cmds:
+      - |
+        if ! command -v golangci-lint &> /dev/null; then
+          echo "⚠️  golangci-lint não encontrado. Instale com:"
+          echo "go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
+          exit 1
+        fi
+        golangci-lint run ./...
